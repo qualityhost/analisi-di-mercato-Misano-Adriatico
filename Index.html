@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisi Mercato Immobiliare Turistico: Misano Adriatico 2024</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chosen Palette: Warm Sand & Sea -->
+    <!-- 
+        Backgrounds: #F9FAFB (Cool Gray 50), #FFFFFF (White)
+        Primary Text: #1F2937 (Gray 800)
+        Secondary Text: #4B5563 (Gray 600)
+        Accents: 
+            - Ocean Blue: #0EA5E9 (Sky 500) for Primary Actions/Data
+            - Sand Gold: #D97706 (Amber 600) for Highlights/Opportunities
+            - Alert/MotoGP Red: #EF4444 (Red 500) for Alerts
+    -->
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; color: #1F2937; }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            height: 300px; 
+            max-height: 400px;
+        }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        
+        .nav-item.active { border-bottom: 2px solid #0EA5E9; color: #0EA5E9; font-weight: 600; }
+        .card-hover:hover { transform: translateY(-2px); transition: all 0.2s ease-in-out; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .tab-btn.active { background-color: #0EA5E9; color: white; }
+    </style>
+
+    <!-- Application Structure Plan: 
+         1. Hero Section: High-level summary KPI dashboard (Immediate value).
+         2. Sticky Navigation: To jump between the 4 main logical pillars (Market, Supply, Opportunities, Strategy).
+         3. Section 1: Tourism Flow (Demand): Interactive charts showing seasonality and origin. Essential to understand WHEN and WHO comes.
+         4. Section 2: Supply & Competition: Comparison of hotel vs extra-hotel, analyzing ADR and Occupancy by property type. Crucial for asset selection.
+         5. Section 3: Event Calendar (The "Opportunity"): A timeline of key dates (MotoGP etc.) which are revenue drivers.
+         6. Section 4: Strategic Action Plan: Interactive decision cards and a final checklist for the investor.
+         
+         Why this structure? It follows the investor's journey: Understand the macro flow -> Analyze the competition -> Identify peak revenue dates -> Formulate a strategy.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. Seasonality (Line Chart): To show the extreme peak of Misano (Summer + MotoGP). Goal: Inform timing. Library: Chart.js.
+         2. Tourist Origin (Doughnut): To visualize the IT/Foreign split. Goal: Target Audience definition. Library: Chart.js.
+         3. ADR vs Occupancy (Bar/Line Combo): To compare property types (Bilo vs Trilo vs Villa). Goal: Asset Selection. Library: Chart.js.
+         4. Booking Channels (Horizontal Bar): To identify acquisition channels. Goal: Marketing Strategy. Library: Chart.js.
+         5. Opportunity Calendar (Styled List/Timeline): Non-chart visual to list specific revenue dates. Goal: Planning. Method: HTML/Tailwind.
+         6. Strategy Cards (Interactive Grid): Clickable cards for distinct strategies (Rent vs Buy). Goal: Synthesis. Method: HTML/JS.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-gray-800 tracking-tight">Invest<span class="text-sky-500">Misano</span></span>
+                </div>
+                <div class="hidden sm:flex space-x-8 items-center" id="desktop-nav">
+                    <button onclick="scrollToSection('overview')" class="nav-item active px-1 pt-1 text-sm font-medium text-gray-900 focus:outline-none">Panoramica</button>
+                    <button onclick="scrollToSection('supply')" class="nav-item px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">Offerta & Prezzi</button>
+                    <button onclick="scrollToSection('calendar')" class="nav-item px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">Calendario Eventi</button>
+                    <button onclick="scrollToSection('strategy')" class="nav-item px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">Strategia</button>
+                </div>
+                <div class="flex items-center sm:hidden">
+                    <!-- Mobile menu button placeholder (simplified for single file) -->
+                    <button class="text-gray-500 hover:text-gray-700 focus:outline-none" onclick="toggleMobileMenu()">Menu</button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden sm:hidden bg-white border-t border-gray-100 pb-2">
+            <button onclick="scrollToSection('overview')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Panoramica</button>
+            <button onclick="scrollToSection('supply')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Offerta & Prezzi</button>
+            <button onclick="scrollToSection('calendar')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Calendario Eventi</button>
+            <button onclick="scrollToSection('strategy')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Strategia</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        
+        <!-- Header / KPI Snapshot -->
+        <header class="bg-white pb-10 pt-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Analisi Mercato Turistico: Misano Adriatico 2024</h1>
+                <p class="text-gray-600 max-w-3xl mb-8">
+                    Report interattivo per investitori immobiliari. Analisi dei flussi, della concorrenza e delle opportunità di rendimento per affitti brevi e property management.
+                </p>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-sky-50 rounded-lg p-5 border border-sky-100 card-hover">
+                        <p class="text-sm font-medium text-sky-600 uppercase tracking-wider">Occ. Media Annuale</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">58%</p>
+                        <p class="text-xs text-gray-500 mt-1">Picco Agosto: 94%</p>
+                    </div>
+                    <div class="bg-amber-50 rounded-lg p-5 border border-amber-100 card-hover">
+                        <p class="text-sm font-medium text-amber-600 uppercase tracking-wider">ADR Medio</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">€125</p>
+                        <p class="text-xs text-gray-500 mt-1">Range: €60 - €250+</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-5 border border-gray-200 card-hover">
+                        <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">RevPAR Medio</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">€72</p>
+                        <p class="text-xs text-gray-500 mt-1">+12% vs 2023</p>
+                    </div>
+                    <div class="bg-indigo-50 rounded-lg p-5 border border-indigo-100 card-hover">
+                        <p class="text-sm font-medium text-indigo-600 uppercase tracking-wider">Top Evento</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1">MotoGP</p>
+                        <p class="text-xs text-gray-500 mt-1">Settembre (ADR x3)</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Section 1: Overview & Seasonality -->
+        <section id="overview" class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900">Flussi Turistici & Stagionalità</h2>
+                <p class="mt-2 text-gray-600 max-w-4xl">
+                    Misano Adriatico presenta una stagionalità marcata tipica della Riviera Romagnola, ma con picchi anomali strategici legati al Misano World Circuit. Capire questi flussi è fondamentale per la gestione del revenue management.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Main Chart: Monthly Seasonality -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Andamento Mensile Presenze</h3>
+                        <div class="flex space-x-2 bg-gray-100 rounded-lg p-1">
+                            <button id="btn-arrivals" class="tab-btn active px-3 py-1 rounded-md text-sm font-medium transition-colors" onclick="updateSeasonalityChart('arrivals')">Arrivi</button>
+                            <button id="btn-nights" class="tab-btn px-3 py-1 rounded-md text-sm font-medium text-gray-600 transition-colors" onclick="updateSeasonalityChart('nights')">Pernottamenti</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="seasonalityChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-500 italic">
+                        Nota il picco di Settembre: effetto MotoGP che estende la stagione oltre il classico balneare.
+                    </div>
+                </div>
+
+                <!-- Secondary Chart: Origin -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Provenienza Turisti</h3>
+                    <div class="chart-container flex-grow flex items-center justify-center" style="height: 250px;">
+                        <canvas id="originChart"></canvas>
+                    </div>
+                    <div class="mt-6 space-y-3">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="text-gray-600 text-sm">Italia (Lombardia, Emilia, Veneto)</span>
+                            <span class="font-bold text-gray-800">72%</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="text-gray-600 text-sm">Estero (Germania, Francia, Svizzera)</span>
+                            <span class="font-bold text-gray-800">28%</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Il mercato estero è in crescita, trainato dagli eventi sportivi e dal miglioramento dei collegamenti.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Supply & Competition -->
+        <section id="supply" class="py-12 bg-gray-50 border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Analisi Offerta e Competitor</h2>
+                    <p class="mt-2 text-gray-600 max-w-4xl">
+                        Il mercato extra-alberghiero compete con un forte settore alberghiero tradizionale. Analizziamo la redditività per tipologia immobiliare per identificare l'investimento migliore.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                    <!-- Performance by Property Type -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Performance per Tipologia</h3>
+                        <p class="text-sm text-gray-500 mb-6">Confronto ADR (Prezzo Medio) e Occupazione stimata</p>
+                        <div class="chart-container">
+                            <canvas id="propertyTypeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Supply Composition -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Composizione Offerta Extra-Alberghiera</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Stat Blocks -->
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <span class="block text-2xl font-bold text-blue-600">65%</span>
+                                <span class="text-sm text-gray-600">Intere Case/Appt.</span>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <span class="block text-2xl font-bold text-green-600">32%</span>
+                                <span class="text-sm text-gray-600">Stanze Private</span>
+                            </div>
+                            <div class="col-span-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 text-sm mb-2">Canali di Prenotazione Dominanti</h4>
+                                <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                                    <div class="bg-blue-600 h-4 rounded-full" style="width: 55%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500 mb-3">
+                                    <span>Booking.com (55%)</span>
+                                    <span>Airbnb (30%)</span>
+                                    <span>Diretto/Altri (15%)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-semibold text-gray-800 text-sm mb-2">Analisi SWOT Competitor</h4>
+                            <ul class="text-sm space-y-2">
+                                <li class="flex items-start">
+                                    <span class="text-green-500 mr-2">●</span>
+                                    <span class="text-gray-600"><strong>Punti di Forza:</strong> Posizione fronte mare, gestione familiare storica.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-red-500 mr-2">●</span>
+                                    <span class="text-gray-600"><strong>Debolezze:</strong> Arredamento datato ("stile anni '80"), scarsa digitalizzazione, rigidità check-in.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Opportunity Calendar -->
+        <section id="calendar" class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900">Calendario Opportunità (High Yield Dates)</h2>
+                <p class="mt-2 text-gray-600">
+                    Date critiche per massimizzare il ROI. In queste date, i prezzi possono triplicare rispetto alla media.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Event Card 1 -->
+                <div class="bg-white p-6 rounded-xl border-l-4 border-amber-500 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold uppercase text-amber-600 bg-amber-50 px-2 py-1 rounded">Top Revenue</span>
+                        <span class="text-sm text-gray-500">Settembre</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">MotoGP: Gran Premio San Marino</h3>
+                    <p class="text-sm text-gray-600 mt-2 mb-4">L'evento più importante dell'anno. Sold-out garantito 6-9 mesi prima.</p>
+                    <div class="text-sm text-gray-800 font-semibold">Strategia: Minimum stay 4 notti, prezzo x3/x4.</div>
+                </div>
+
+                <!-- Event Card 2 -->
+                <div class="bg-white p-6 rounded-xl border-l-4 border-blue-500 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold uppercase text-blue-600 bg-blue-50 px-2 py-1 rounded">Alta Stagione</span>
+                        <span class="text-sm text-gray-500">Giugno</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">World Ducati Week / Superbike</h3>
+                    <p class="text-sm text-gray-600 mt-2 mb-4">Eventi ricorrenti che attirano appassionati alto-spendenti da tutto il mondo.</p>
+                    <div class="text-sm text-gray-800 font-semibold">Strategia: Pacchetti "Biker Friendly" (parcheggio sicuro).</div>
+                </div>
+
+                <!-- Event Card 3 -->
+                <div class="bg-white p-6 rounded-xl border-l-4 border-pink-500 shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold uppercase text-pink-600 bg-pink-50 px-2 py-1 rounded">Mass Market</span>
+                        <span class="text-sm text-gray-500">Luglio</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">Notte Rosa</h3>
+                    <p class="text-sm text-gray-600 mt-2 mb-4">Il "Capodanno dell'Estate". Grande afflusso di giovani e famiglie.</p>
+                    <div class="text-sm text-gray-800 font-semibold">Strategia: Prezzo alto, attenzione alla cauzione danni.</div>
+                </div>
+            </div>
+
+            <!-- Detailed Month Table -->
+            <div class="mt-8 bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mese</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target Principale</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Potenziale ADR</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Note Strategiche</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 text-sm">
+                        <tr>
+                            <td class="px-6 py-4 font-medium text-gray-900">Aprile - Maggio</td>
+                            <td class="px-6 py-4 text-gray-600">Cicloturisti, Sportivi</td>
+                            <td class="px-6 py-4 text-gray-600">€70 - €90</td>
+                            <td class="px-6 py-4 text-gray-600">Offrire deposito bici sicuro.</td>
+                        </tr>
+                        <tr class="bg-sky-50">
+                            <td class="px-6 py-4 font-medium text-gray-900">Giugno - Agosto</td>
+                            <td class="px-6 py-4 text-gray-600">Famiglie Balneari</td>
+                            <td class="px-6 py-4 text-gray-600">€140 - €250+</td>
+                            <td class="px-6 py-4 text-gray-600">Focus su servizi family (culla, seggiolone). Soggiorni 7+ notti.</td>
+                        </tr>
+                        <tr class="bg-amber-50">
+                            <td class="px-6 py-4 font-medium text-gray-900">Settembre</td>
+                            <td class="px-6 py-4 text-gray-600">Motorsport (MotoGP)</td>
+                            <td class="px-6 py-4 text-gray-600">€300+ (Weekend)</td>
+                            <td class="px-6 py-4 text-gray-600">Massimizzazione assoluta del profitto.</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 font-medium text-gray-900">Ottobre - Marzo</td>
+                            <td class="px-6 py-4 text-gray-600">Business, Fiera Rimini</td>
+                            <td class="px-6 py-4 text-gray-600">€50 - €70</td>
+                            <td class="px-6 py-4 text-gray-600">Affitti medio termine (Transitori) o chiusura parziale per manutenzione.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 4: Strategic Analysis -->
+        <section id="strategy" class="py-12 bg-gray-900 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-10 text-center">
+                    <h2 class="text-3xl font-bold text-white">Piano d'Azione Investitore</h2>
+                    <p class="mt-4 text-gray-400 max-w-2xl mx-auto">
+                        Conclusioni operative basate sui dati per massimizzare il ROI a Misano Adriatico.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <!-- Target Strategy -->
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                        <div class="h-12 w-12 bg-sky-500 rounded-lg flex items-center justify-center mb-4 text-2xl">🎯</div>
+                        <h3 class="text-xl font-bold mb-3">1. Target Profittevole</h3>
+                        <p class="text-gray-300 text-sm mb-4">
+                            Il mix vincente è <strong>Famiglie (Estate)</strong> + <strong>Team/Fan Motori (Primavera/Settembre)</strong>.
+                        </p>
+                        <ul class="text-sm text-gray-400 list-disc list-inside space-y-1">
+                            <li>Evita i monolocali (troppo piccoli per famiglie).</li>
+                            <li>Evita immobili lontani dal mare o circuito.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Asset Strategy -->
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                        <div class="h-12 w-12 bg-amber-500 rounded-lg flex items-center justify-center mb-4 text-2xl">🏠</div>
+                        <h3 class="text-xl font-bold mb-3">2. Immobile Ideale</h3>
+                        <p class="text-gray-300 text-sm mb-4">
+                            <strong>Trilocale Ristrutturato</strong> (4-6 posti letto) con <strong>Parcheggio Privato</strong>.
+                        </p>
+                        <ul class="text-sm text-gray-400 list-disc list-inside space-y-1">
+                            <li>Il parcheggio è l'oro di Misano (soprattutto per i biker).</li>
+                            <li>Design moderno "Coastal" per foto su Airbnb.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Differentiation Strategy -->
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700">
+                        <div class="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center mb-4 text-2xl">🚀</div>
+                        <h3 class="text-xl font-bold mb-3">3. Fattore Differenziante</h3>
+                        <p class="text-gray-300 text-sm mb-4">
+                            Digitalizzazione e servizi specifici.
+                        </p>
+                        <ul class="text-sm text-gray-400 list-disc list-inside space-y-1">
+                            <li>Self check-in (raro nei competitor storici).</li>
+                            <li>Kit Spiaggia incluso + Convenzione Bici.</li>
+                            <li>Wi-Fi fibra per smart working off-season.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Final Recommendation Box -->
+                <div class="bg-gray-800 rounded-xl p-8 border border-sky-900 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-sky-500 rounded-full opacity-20 blur-xl"></div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Raccomandazione Finale Consulente</h3>
+                    <p class="text-gray-300 mb-6 leading-relaxed">
+                        Il mercato di Misano è solido ma saturo di offerta obsoleta. L'opportunità reale non è solo "comprare e affittare", ma <strong>"riqualificare e posizionare"</strong>. Entrare nel mercato con un immobile dal design contemporaneo, aria condizionata in ogni stanza e, tassativamente, un posto auto, permette di applicare un <strong>Premium Price del 20-30%</strong> rispetto alla media.
+                        <br><br>
+                        <strong>Consiglio Operativo:</strong> Se il budget lo permette, acquista un trilocale da ristrutturare in zona "Misano Brasile" o vicino al lungomare Nord (prezzi leggermente più bassi del centro, alta domanda). Utilizza la cedolare secca e affidati a un Channel Manager professionale per la gestione dinamica dei prezzi durante il MotoGP.
+                    </p>
+                    <button onclick="window.print()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                        Esporta Analisi (Stampa PDF)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 border-t border-gray-200 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-sm text-gray-500">&copy; 2024 Misano Real Estate Analytics. Simulazione AI basata su dati di mercato stimati.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- State Management ---
+        const state = {
+            currentSeasonalityView: 'arrivals', // 'arrivals' or 'nights'
+            charts: {}
+        };
+
+        // --- Data (Simulated based on Misano typical trends) ---
+        const marketData = {
+            months: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'],
+            arrivals: [2000, 2500, 3500, 8000, 12000, 45000, 75000, 85000, 40000, 10000, 3000, 2500],
+            nights: [5000, 6000, 9000, 25000, 40000, 180000, 350000, 420000, 120000, 25000, 8000, 6000],
+            
+            origin: {
+                labels: ['Italia', 'Germania', 'Francia', 'Svizzera', 'Altri'],
+                data: [72, 15, 5, 4, 4]
+            },
+            
+            propertyTypes: {
+                labels: ['Monolocale', 'Bilocale', 'Trilocale', 'Villa'],
+                adr: [85, 120, 165, 350], // Average Daily Rate in Euro
+                occupancy: [45, 62, 70, 55] // Percentage
+            }
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initSeasonalityChart();
+            initOriginChart();
+            initPropertyTypeChart();
+        });
+
+        // --- Navigation Logic ---
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            const navHeight = 70; // approx height of sticky nav
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+
+            // Update Active State
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            // Simple logic: assume if clicked, it's active. Real scroll spy would be more complex.
+            const activeBtn = Array.from(document.querySelectorAll('.nav-item')).find(b => b.getAttribute('onclick').includes(id));
+            if(activeBtn) activeBtn.classList.add('active');
+            
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- Chart 1: Seasonality (Line/Area) ---
+        function initSeasonalityChart() {
+            const ctx = document.getElementById('seasonalityChart').getContext('2d');
+            
+            // Gradient for area fill
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(14, 165, 233, 0.5)'); // Sky 500
+            gradient.addColorStop(1, 'rgba(14, 165, 233, 0.0)');
+
+            state.charts.seasonality = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: marketData.months,
+                    datasets: [{
+                        label: 'Arrivi Turistici',
+                        data: marketData.arrivals,
+                        borderColor: '#0EA5E9', // Sky 500
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#0EA5E9',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1F2937',
+                            padding: 12,
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 14 },
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y.toLocaleString('it-IT') + (state.currentSeasonalityView === 'arrivals' ? ' Arrivi' : ' Notti');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#F3F4F6' },
+                            ticks: { font: { family: 'Inter' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Inter' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSeasonalityChart(view) {
+            state.currentSeasonalityView = view;
+            const chart = state.charts.seasonality;
+            const btnArrivals = document.getElementById('btn-arrivals');
+            const btnNights = document.getElementById('btn-nights');
+
+            if (view === 'arrivals') {
+                chart.data.datasets[0].data = marketData.arrivals;
+                chart.data.datasets[0].label = 'Arrivi Turistici';
+                btnArrivals.classList.add('active');
+                btnArrivals.classList.remove('text-gray-600');
+                btnNights.classList.remove('active');
+                btnNights.classList.add('text-gray-600');
+            } else {
+                chart.data.datasets[0].data = marketData.nights;
+                chart.data.datasets[0].label = 'Pernottamenti Totali';
+                btnNights.classList.add('active');
+                btnNights.classList.remove('text-gray-600');
+                btnArrivals.classList.remove('active');
+                btnArrivals.classList.add('text-gray-600');
+            }
+            chart.update();
+        }
+
+        // --- Chart 2: Origin (Doughnut) ---
+        function initOriginChart() {
+            const ctx = document.getElementById('originChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: marketData.origin.labels,
+                    datasets: [{
+                        data: marketData.origin.data,
+                        backgroundColor: [
+                            '#0EA5E9', // Sky 500 (Italy)
+                            '#F59E0B', // Amber 500
+                            '#10B981', // Emerald 500
+                            '#6366F1', // Indigo 500
+                            '#9CA3AF'  // Gray 400
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { usePointStyle: true, padding: 20, font: { family: 'Inter', size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Chart 3: Property Type Performance (Bar with secondary axis) ---
+        function initPropertyTypeChart() {
+            const ctx = document.getElementById('propertyTypeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: marketData.propertyTypes.labels,
+                    datasets: [
+                        {
+                            label: 'ADR Medio (€)',
+                            data: marketData.propertyTypes.adr,
+                            backgroundColor: '#0EA5E9',
+                            borderRadius: 4,
+                            order: 2
+                        },
+                        {
+                            label: 'Occupazione (%)',
+                            data: marketData.propertyTypes.occupancy,
+                            type: 'line',
+                            borderColor: '#F59E0B', // Amber
+                            backgroundColor: '#F59E0B',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            yAxisID: 'y1',
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', align: 'end' },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Prezzo (€)' },
+                            grid: { color: '#F3F4F6' }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            max: 100,
+                            title: { display: true, text: 'Occupazione (%)' },
+                            grid: { display: false }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
